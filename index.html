@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VIB Electrophysiology Unit — System Advisor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg0:#080c18;--bg1:#0b1222;--bg2:#0e1830;
+  --surface:rgba(255,255,255,0.022);--surface-h:rgba(255,255,255,0.045);
+  --border:rgba(255,255,255,0.055);--border-h:rgba(255,255,255,0.12);
+  --accent:#2dd4bf;--accent2:#38bdf8;--accent-dim:rgba(45,212,191,0.12);
+  --accent-border:rgba(45,212,191,0.25);
+  --gold:#fbbf24;
+  --txt:#e2e8f0;--txt2:#94a3b8;--txt3:#64748b;--txt4:#475569;
+  --font:'DM Sans',system-ui,-apple-system,sans-serif;
+}
+html{font-size:16px}
+body{
+  min-height:100vh;font-family:var(--font);color:var(--txt);
+  background:linear-gradient(170deg,var(--bg0) 0%,var(--bg1) 40%,var(--bg2) 100%);
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:700px;margin:0 auto;padding:28px 20px}
+
+/* ── Header ── */
+.hdr{text-align:center;margin-bottom:28px}
+.badge{
+  display:inline-flex;align-items:center;gap:8px;padding:6px 18px;
+  background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:100px;margin-bottom:12px;
+}
+.badge svg{width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:1.5}
+.badge span{font-size:11.5px;letter-spacing:1.6px;text-transform:uppercase;color:var(--accent);font-weight:600}
+.main-title{
+  font-size:clamp(22px,4vw,28px);font-weight:700;
+  background:linear-gradient(135deg,var(--txt),var(--accent));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+
+/* ── Breadcrumbs ── */
+.breadcrumbs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;justify-content:center}
+.bc{
+  display:flex;flex-direction:column;padding:5px 10px;
+  background:var(--surface);border:1px solid rgba(255,255,255,0.035);border-radius:8px;max-width:210px;
+}
+.bc-q{font-size:10px;color:var(--txt4);line-height:1.3}
+.bc-a{font-size:11px;color:var(--txt2);font-weight:500}
+
+/* ── Question Card ── */
+.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:26px 24px;
+  animation:fadeUp .35s ease;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.step-label{font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:1.6px;margin-bottom:10px;font-weight:600}
+.q-text{font-size:17px;font-weight:600;line-height:1.38;color:#f1f5f9;margin-bottom:4px}
+.q-sub{font-size:13px;color:var(--txt3);line-height:1.5;margin-bottom:20px}
+.options{display:flex;flex-direction:column;gap:7px}
+
+/* ── Option Buttons ── */
+.opt{
+  display:flex;align-items:center;gap:12px;padding:11px 16px;width:100%;
+  background:var(--surface);border:1px solid rgba(255,255,255,0.055);border-radius:10px;
+  cursor:pointer;text-align:left;color:var(--txt);font-size:13.5px;font-family:var(--font);
+  transition:all .15s ease;outline:none;
+}
+.opt:hover{background:var(--surface-h);border-color:var(--border-h)}
+.opt.selected{background:rgba(45,212,191,0.07);border-color:var(--accent-border);color:var(--accent)}
+.opt.nr-opt{color:var(--txt3);font-style:italic;border-color:rgba(255,255,255,0.03);background:rgba(255,255,255,0.008)}
+.opt.nr-opt.selected{color:var(--accent);background:rgba(45,212,191,0.07);border-color:var(--accent-border);font-style:italic}
+.radio,.check{
+  width:18px;height:18px;flex-shrink:0;
+  border:2px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;
+  transition:all .15s ease;
+}
+.radio{border-radius:9px}
+.check{border-radius:4px}
+.opt.selected .radio,.opt.selected .check{border-color:var(--accent);background:var(--accent)}
+.radio-dot{width:7px;height:7px;border-radius:4px;background:var(--bg1);display:none}
+.opt.selected .radio-dot{display:block}
+.check-mark{color:var(--bg1);font-size:11px;font-weight:700;display:none}
+.opt.selected .check-mark{display:block}
+
+/* ── Buttons ── */
+.btn-go{
+  display:flex;align-items:center;justify-content:center;gap:6px;width:100%;
+  padding:11px 24px;margin-top:16px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border:none;border-radius:10px;font-size:14px;font-weight:600;color:var(--bg1);
+  cursor:pointer;font-family:var(--font);transition:opacity .2s;
+}
+.btn-go:disabled{opacity:.3;cursor:default}
+.btn-back{
+  display:inline-flex;align-items:center;gap:6px;padding:8px 16px;margin-top:14px;
+  background:none;border:1px solid rgba(255,255,255,0.06);border-radius:8px;
+  color:var(--txt3);font-size:13px;cursor:pointer;font-family:var(--font);transition:all .15s;
+}
+.btn-back:hover{border-color:var(--border-h);color:var(--txt2)}
+.btn-reset{
+  display:inline-flex;align-items:center;gap:6px;padding:9px 24px;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:9px;
+  color:var(--txt2);font-size:13px;cursor:pointer;font-family:var(--font);transition:all .15s;
+}
+.btn-reset:hover{background:rgba(255,255,255,0.08);color:var(--txt)}
+
+/* ── Results ── */
+.r-title{font-size:22px;font-weight:700;text-align:center;color:#f1f5f9;margin-bottom:4px}
+.r-sub{font-size:13px;color:var(--txt3);text-align:center;margin-bottom:20px}
+.summary{
+  margin-bottom:20px;background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.04);
+  border-radius:10px;padding:10px 14px;
+}
+.summary summary{font-size:12.5px;color:var(--accent);cursor:pointer;font-weight:500;list-style:none}
+.summary summary::-webkit-details-marker{display:none}
+.summary-list{margin-top:10px;display:flex;flex-direction:column;gap:5px}
+.s-item{padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.s-q{font-size:10.5px;color:var(--txt4)}
+.s-a{font-size:12px;color:var(--txt2);font-weight:500}
+
+/* ── System Cards ── */
+.sys-list{display:flex;flex-direction:column;gap:10px}
+.sys{
+  border-radius:14px;padding:16px 20px;cursor:pointer;transition:all .2s;
+  animation:fadeUp .4s ease both;
+}
+.sys:nth-child(2){animation-delay:.05s}.sys:nth-child(3){animation-delay:.1s}
+.sys:nth-child(4){animation-delay:.15s}.sys:nth-child(5){animation-delay:.2s}
+.sys-top{background:rgba(45,212,191,0.05);border:1px solid var(--accent-border)}
+.sys-other{background:var(--surface);border:1px solid rgba(255,255,255,0.045)}
+.sys:hover{border-color:var(--border-h)}
+.sys-header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+.sys-info{flex:1}
+.sys-name-row{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+.sys-name{font-size:15px;font-weight:600}
+.sys-name.top{color:var(--accent)}.sys-name.other{color:var(--txt)}
+.sys-desc{font-size:12.5px;color:var(--txt2);margin:3px 0 9px}
+.sys-prep{font-size:11px;color:var(--txt3);padding:3px 9px;background:rgba(255,255,255,0.03);border-radius:5px;white-space:nowrap;flex-shrink:0;align-self:flex-start}
+.bar-wrap{display:flex;align-items:center;gap:8px}
+.bar-bg{flex:1;max-width:180px;height:5px;background:rgba(255,255,255,0.05);border-radius:3px}
+.bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.bar-fill.top{background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.bar-fill.other{background:linear-gradient(90deg,#475569,#64748b)}
+.bar-pct{font-size:12.5px;font-weight:700;min-width:36px}
+.bar-pct.top{color:var(--accent)}.bar-pct.other{color:var(--txt2)}
+
+/* ── Expanded Detail ── */
+.sys-detail{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.05);display:none}
+.sys.expanded .sys-detail{display:block;animation:fadeUp .25s ease}
+.sec-label{font-size:10.5px;text-transform:uppercase;letter-spacing:1.2px;color:var(--txt3);margin-bottom:6px;font-weight:600}
+.reason-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+.reason-tag{
+  display:inline-flex;align-items:center;gap:4px;font-size:11.5px;padding:2.5px 9px;
+  background:var(--accent-dim);border:1px solid rgba(45,212,191,0.14);border-radius:100px;color:var(--accent);
+}
+.reason-tag svg{width:12px;height:12px;stroke:var(--accent);fill:none;stroke-width:2.5}
+.feat-line{font-size:12.5px;color:#cbd5e1;padding-left:10px;border-left:2px solid rgba(45,212,191,0.18);margin-bottom:4px}
+.exp-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 14px}
+.exp-item{font-size:11.5px;color:var(--txt2);padding:1.5px 0}
+
+@media(max-width:500px){
+  .exp-grid{grid-template-columns:1fr}
+  .sys-header{flex-direction:column;gap:6px}
+  .sys-prep{align-self:flex-start}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap" id="app"></div>
+
+<script>
+/* ═══════════════════ DATA ═══════════════════ */
+const SYSTEMS=[
+{id:"slice_auto",name:"Slice setup (automated xy table)",shortDesc:"Dual patch clamp + scanner-based directed optogenetics in slices",prep:"Acute brain slices",tags:["slice","patch_clamp","dual_patch","directed_opto","optogenetics","extracellular_stim","connectivity","plasticity","pharmacology","temperature","single_cell"],highlights:["Scanner-based directed optogenetic illumination (Rapp UGA-42 Combo)","Spot illumination for spatially precise optogenetic activation","Dual simultaneous patch clamp recordings","Extracellular electrical stimulation (AM-systems)"],experiments:["CRACM (channelrhodopsin-assisted circuit mapping)","Site-directed optogenetic stimulation of specific cells","Dual-color optogenetics for multi-pathway investigation","Synaptic connectivity mapping","AMPAR/NMDAR ratios, paired-pulse ratio, AMPAR rectification","Spontaneous & miniature postsynaptic current analysis","Intrinsic excitability profiling","Long-range projection mapping with viral opsins","Pharmacological receptor/channel studies"]},
+{id:"slice_manual",name:"Slice setup (manual xy table)",shortDesc:"Dual patch clamp + scanner-based directed optogenetics in slices",prep:"Acute brain slices",tags:["slice","patch_clamp","dual_patch","directed_opto","optogenetics","extracellular_stim","connectivity","plasticity","pharmacology","temperature","single_cell"],highlights:["Scanner-based directed optogenetic illumination (Rapp UGA-42 Combo)","Spot illumination for spatially precise optogenetic activation","Dual simultaneous patch clamp recordings","Newer system (2018)"],experiments:["CRACM (channelrhodopsin-assisted circuit mapping)","Site-directed optogenetic stimulation","Dual-color optogenetics","Synaptic connectivity mapping","AMPAR/NMDAR ratios, paired-pulse ratio","Spontaneous & miniature postsynaptic current analysis","Intrinsic excitability profiling","Pharmacological receptor/channel studies"]},
+{id:"slice_heka",name:"Slice setup (HEKA)",shortDesc:"Dual patch clamp + optogenetics + iontophoresis in slices",prep:"Acute brain slices",tags:["slice","patch_clamp","dual_patch","widefield_opto","optogenetics","extracellular_stim","iontophoresis","connectivity","plasticity","pharmacology","focal_application","temperature","single_cell"],highlights:["Iontophoresis system (NPI) for focal drug/neurotransmitter delivery","LED-based widefield optogenetic stimulation (Cairn Research)","Dual simultaneous patch clamp recordings","Focal neurotransmitter application along dendrites"],experiments:["Iontophoretic receptor mapping along dendrites","Focal neurotransmitter application studies","Widefield LED optogenetic stimulation","GPCR signaling via focal agonist application","Synaptic connectivity with electrical/optogenetic stim","Intrinsic excitability profiling","Pharmacological studies (bath + iontophoresis)","Short-term plasticity (PPR, facilitation/depression)"]},
+{id:"slice_colibri",name:"Slice setup (HEKA, Colibri)",shortDesc:"Dual patch clamp + optogenetics + high-speed live cell imaging",prep:"Acute brain slices",tags:["slice","patch_clamp","dual_patch","widefield_opto","optogenetics","extracellular_stim","imaging","calcium_imaging","live_imaging","connectivity","plasticity","pharmacology","temperature","single_cell"],highlights:["High-speed live cell imaging (Hamamatsu ORCA FLASH 4.0V3)","Multi-wavelength LED illumination (Zeiss Colibri)","Simultaneous electrophysiology + fluorescence imaging","Dual simultaneous patch clamp recordings"],experiments:["Calcium imaging concurrent with patch clamp","Multi-wavelength optogenetic experiments","GCaMP / genetically encoded indicator imaging with ephys","Dendritic calcium dynamics during synaptic activity","Voltage-sensitive dye imaging with patch clamp","Network activity visualization (bulk-loaded indicators)","Morphological reconstruction via dye-filling","Synaptic connectivity studies","Short-term plasticity studies"]},
+{id:"culture_main",name:"Primary culture setup",shortDesc:"Dual patch clamp + fast imaging + fast solution exchange",prep:"Dissociated neuronal cultures",tags:["culture","dissociated","patch_clamp","dual_patch","imaging","fast_application","receptor_kinetics","ion_channel","pharmacology","ipsc","hek","calcium_imaging","single_cell"],highlights:["Fast multibarrel solution exchange (Warner SF-77B, ms timescale)","High-speed fluorescence imaging (Lambda DG-4 + Andor Neo 5.5)","Ideal for receptor kinetics and rapid drug application","Dual simultaneous recordings from connected neuron pairs"],experiments:["Rapid agonist/antagonist application for receptor kinetics","Receptor desensitization/resensitization (AMPA, NMDA, GABA, glycine)","Ion channel biophysics (activation, inactivation, recovery)","Dose-response curves with fast drug exchange","High-speed calcium imaging with electrophysiology","Fluorescence ion imaging (Ca²⁺, Na⁺, Cl⁻, pH)","iPSC-derived neuron characterization","Heterologous expression system recordings (HEK, CHO)","Excitotoxicity and neuroprotection studies","Presynaptic bouton recordings"]},
+{id:"culture_olympus",name:"Primary culture setup (Olympus)",shortDesc:"Single patch clamp + imaging + solution exchange",prep:"Dissociated neuronal cultures",tags:["culture","dissociated","patch_clamp","imaging","pharmacology","ion_channel","ipsc","hek","calcium_imaging","optogenetics","widefield_opto","single_cell"],highlights:["Fluorescence imaging (CoolLED pE-300 + Hamamatsu Orca Halo)","Multibarrel bath application system","LED-based optogenetic stimulation capability","Single patch clamp recordings"],experiments:["Single-cell electrophysiology with fluorescence imaging","Ion channel biophysics and pharmacology","Calcium imaging with electrophysiology","iPSC-derived neuron characterization","Heterologous expression system recordings (HEK, CHO)","LED-based optogenetic experiments in culture","Receptor characterization with bath application","Intrinsic excitability profiling"]},
+{id:"cmos_mea",name:"CMOS MEA (MaxTwo)",shortDesc:"High-density multi-well MEA for high-throughput network recordings",prep:"Dissociated neuronal cultures",tags:["culture","dissociated","mea","hd_mea","network","high_throughput","screening","drug_discovery","ipsc","organoid","axonal_velocity","longitudinal","cardiomyocyte","population"],highlights:["26,400 electrodes per well at 17.5 µm pitch","Multi-well format (6 or 24 wells) for parallel experiments","Subcellular resolution: axonal conduction velocity tracking","Long-term label-free longitudinal recordings","Automation-compatible for high-throughput screening"],experiments:["High-throughput network activity screening","Action potential propagation velocity measurement","Axonal conduction velocity tracking","iPSC-derived neuron quality/maturation assessment","Phenotypic screening for disease models","Drug discovery compound screening","Safety pharmacology / neurotoxicity profiling","Longitudinal network development studies","Brain organoid activity recordings","Electrical stimulation and evoked responses","Functional connectivity analysis","Cardiomyocyte electrophysiology"]},
+{id:"mea_1",name:"MEA system 1",shortDesc:"60-electrode MEA for field recordings in acute brain slices",prep:"Acute brain slices",tags:["slice","mea","field_potential","ltp","ltd","plasticity","epilepsy","network","pharmacology","temperature","oscillations","population"],highlights:["Double-chamber (record from two slices simultaneously)","60-electrode MEA with up to 50 kHz sampling","Integrated temperature control and perfusion","Built-in electrical stimulator"],experiments:["LTP induction and monitoring","LTD protocols","fEPSP recordings","Population spike recordings","Input-output curves","Paired-pulse stimulation","Epileptiform activity detection","Spreading depression","Pharmacological modulation of plasticity","Network oscillation analysis (gamma, theta, ripples)","Drug screening on synaptic transmission"]},
+{id:"mea_2",name:"MEA system 2",shortDesc:"60-electrode MEA for field recordings in acute brain slices",prep:"Acute brain slices",tags:["slice","mea","field_potential","ltp","ltd","plasticity","epilepsy","network","pharmacology","temperature","oscillations","population"],highlights:["Double-chamber (record from two slices simultaneously)","60-electrode MEA with up to 50 kHz sampling","Integrated temperature control and perfusion","Newer system (2020)"],experiments:["LTP induction and monitoring","LTD protocols","fEPSP recordings","Population spike recordings","Input-output curves","Paired-pulse stimulation","Epileptiform activity detection","Spreading depression","Pharmacological modulation of plasticity","Network oscillation analysis","Drug screening on synaptic transmission"]},
+{id:"multiphoton",name:"Multiphoton-electrophysiology system",shortDesc:"Two-photon imaging + SLM holographic optogenetics + patch clamp",prep:"Acute brain slices / In vivo",tags:["slice","in_vivo","patch_clamp","dual_patch","two_photon","imaging","calcium_imaging","optogenetics","directed_opto","holographic","slm","extracellular_stim","deep_imaging","uncaging","spine_imaging","connectivity","morphology","single_cell"],highlights:["Tunable two-photon laser (MaiTai, 690–1040 nm)","SLM-based holographic 3D photostimulation (3i Phasor 18D)","Simultaneous multipoint arbitrary pattern stimulation","Resonant + galvo scanning for high-speed volumetric imaging","Combined with HEKA Double EPC10 electrophysiology","Suitable for in vivo and ex vivo experiments"],experiments:["Two-photon calcium imaging in slices and in vivo","Simultaneous 2P imaging + whole-cell patch clamp","SLM holographic single-cell optogenetics","All-optical read-write of neural activity","3D targeted photostimulation across volumes","Two-photon glutamate uncaging at individual spines","Dendritic integration and spine calcium dynamics","Neural ensemble identification and manipulation","Deep tissue imaging (>300 µm)","Structural plasticity and spine morphology imaging","Blood flow and vascular imaging","Long-range projection imaging"]},
+{id:"multipatch",name:"Multipatch system",shortDesc:"8 simultaneous patch clamp recordings + optogenetics + imaging",prep:"Acute brain slices",tags:["slice","patch_clamp","multi_patch","dual_patch","widefield_opto","optogenetics","extracellular_stim","imaging","live_imaging","calcium_imaging","connectivity","microcircuit","high_throughput_patch","human_tissue","single_cell"],highlights:["8 simultaneous whole-cell recordings (2× HEKA Quadro EPC10)","Up to 56 testable connections per recorded cluster","LED optogenetics (CoolLED pE-400max, 4 wavelengths)","High-speed live cell imaging (Hamamatsu ORCA FLASH 4.0V3)","LNScope (Luigs & Neumann) upright microscope"],experiments:["High-throughput synaptic connectivity mapping","Microcircuit analysis (connection probabilities)","Higher-order connectivity motifs (triplets, quadruplets)","Multi-neuron synaptic dynamics (convergence, divergence)","Cell-type specific connectivity mapping","Human brain slice microcircuit analysis","Simultaneous optogenetic stim + multi-cell recording","Cross-species comparative microcircuit analysis","Disease model circuit characterization","Intrinsic excitability profiling across multiple cells","Morphological reconstruction of neuron clusters"]},
+{id:"slice_cmos",name:"Slice CMOS MEA (3Brain)",shortDesc:"High-density 4,096-electrode MEA for slices and organoids",prep:"Acute brain slices / Organoids",tags:["slice","organoid","mea","hd_mea","field_potential","ltp","ltd","plasticity","epilepsy","network","pharmacology","3d_recording","retina","screening","population"],highlights:["4,096 electrodes at 60 µm pitch (3.8×3.8 mm² area)","3D µNeedle electrodes for in-tissue recordings","Automated LTP/LTD protocols (BrainWave software)","Simultaneous recording and stimulation from any electrode","Designed for slices, organoids, spheroids, retina"],experiments:["High-resolution field potential mapping across large brain areas","LTP/LTD protocols with automated analysis","Population spike mapping at high spatial resolution","Epileptiform activity and seizure propagation mapping","Brain organoid electrophysiology","3D tissue recordings with µNeedle electrodes","Spreading depression wave tracking","Activity propagation velocity mapping","Drug screening on plasticity in slices","Retinal explant recordings","Spheroid electrophysiology","Disease model characterization"]}
+];
+
+const Q={
+start:{id:"start",text:"What type of biological preparation will you work with?",subtitle:"This determines which systems are physically compatible with your experiments.",type:"single",options:[{label:"Acute brain slices",value:"slice",next:"slice_resolution"},{label:"Dissociated / cultured neurons",value:"culture",next:"culture_method"},{label:"Brain organoids or spheroids",value:"organoid",next:"organoid_method"},{label:"In vivo (live animal)",value:"in_vivo",next:"invivo_focus"},{label:"Not relevant / not sure yet",value:"nr",next:"generic_resolution"}]},
+slice_resolution:{id:"slice_resolution",text:"What level of recording resolution do you need?",subtitle:"Single-cell patch clamp gives intracellular detail; MEA gives population-level network overview.",type:"single",options:[{label:"Single-cell (patch clamp)",value:"single_cell",next:"slice_patch_count"},{label:"Population / field potentials (MEA)",value:"population",next:"slice_mea_density"},{label:"Both single-cell and population",value:"both",next:"slice_patch_count"},{label:"Not relevant",value:"nr",next:"slice_patch_count"}]},
+slice_patch_count:{id:"slice_patch_count",text:"How many neurons do you need to record simultaneously?",subtitle:"More simultaneous recordings dramatically increase connectivity mapping throughput.",type:"single",options:[{label:"1–2 neurons (standard paired recordings)",value:"few",next:"slice_opto"},{label:"Many neurons (4–8+) for microcircuit mapping",value:"many",next:"multipatch_imaging"},{label:"Not relevant",value:"nr",next:"slice_opto"}]},
+slice_opto:{id:"slice_opto",text:"Do you need optogenetic stimulation in your slice experiments?",subtitle:"Different systems offer different spatial precision for light-based neuronal activation.",type:"single",options:[{label:"Yes — spatially directed / scanner-based (target specific cells)",value:"directed",next:"slice_opto_imaging"},{label:"Yes — widefield LED (activate whole field of view)",value:"widefield",next:"slice_opto_imaging"},{label:"Yes — two-photon holographic (single-cell 3D precision)",value:"holographic",next:"slice_2p_focus"},{label:"No optogenetics needed",value:"none",next:"slice_no_opto_imaging"},{label:"Not relevant",value:"nr",next:"slice_opto_imaging"}]},
+slice_opto_imaging:{id:"slice_opto_imaging",text:"Do you also need imaging concurrent with your recordings?",subtitle:"Some setups combine electrophysiology with fluorescence or calcium imaging.",type:"single",options:[{label:"Yes — calcium or fluorescence imaging",value:"calcium",next:"slice_special"},{label:"Yes — two-photon deep tissue imaging",value:"two_photon",next:"slice_2p_focus"},{label:"No imaging needed",value:"none",next:"slice_special"},{label:"Not relevant",value:"nr",next:"slice_special"}]},
+slice_no_opto_imaging:{id:"slice_no_opto_imaging",text:"Do you need imaging concurrent with your recordings?",subtitle:"Imaging can add spatial information to your electrophysiology data.",type:"single",options:[{label:"Yes — calcium or fluorescence imaging",value:"calcium",next:"slice_special"},{label:"Yes — two-photon deep tissue imaging",value:"two_photon",next:"slice_2p_focus"},{label:"No imaging needed",value:"none",next:"slice_special"},{label:"Not relevant",value:"nr",next:"slice_special"}]},
+slice_2p_focus:{id:"slice_2p_focus",text:"What is your primary interest with two-photon capabilities?",subtitle:"The multiphoton system supports various advanced optical experiments.",type:"multi",options:[{label:"Calcium imaging of neuronal populations",value:"2p_calcium",next:"slice_special"},{label:"Holographic single-cell optogenetic manipulation",value:"2p_holographic",next:"slice_special"},{label:"Dendritic spine imaging and glutamate uncaging",value:"2p_spine",next:"slice_special"},{label:"Deep tissue imaging (>300 µm)",value:"2p_deep",next:"slice_special"},{label:"Not relevant",value:"nr",next:"slice_special"}]},
+slice_special:{id:"slice_special",text:"Do you need any of these specialized capabilities?",subtitle:"These narrow down which specific setup variant is best suited.",type:"multi",options:[{label:"Iontophoresis (focal drug/neurotransmitter delivery)",value:"iontophoresis",next:"RESULTS"},{label:"Synaptic plasticity as primary focus (LTP/LTD)",value:"plasticity_focus",next:"RESULTS"},{label:"Human brain tissue (neurosurgical resections)",value:"human_tissue",next:"RESULTS"},{label:"Pharmacological screening",value:"pharmacology",next:"RESULTS"},{label:"Not relevant",value:"nr",next:"RESULTS"}]},
+multipatch_imaging:{id:"multipatch_imaging",text:"Do you also need imaging alongside the multi-cell recordings?",subtitle:"The multipatch system can be combined with live cell imaging and optogenetics.",type:"single",options:[{label:"Yes — live cell / calcium imaging",value:"imaging_yes",next:"multipatch_connectivity"},{label:"Yes — with optogenetic stimulation",value:"opto_yes",next:"multipatch_connectivity"},{label:"No — electrophysiology only",value:"none",next:"multipatch_connectivity"},{label:"Not relevant",value:"nr",next:"multipatch_connectivity"}]},
+multipatch_connectivity:{id:"multipatch_connectivity",text:"What is your main connectivity analysis goal?",subtitle:"Different analysis goals benefit from different recording configurations.",type:"single",options:[{label:"Connection probability mapping in local circuits",value:"probability",next:"slice_special"},{label:"Higher-order motifs (triplets, convergence, divergence)",value:"motifs",next:"slice_special"},{label:"Cross-species or disease model comparison",value:"comparison",next:"slice_special"},{label:"Not relevant",value:"nr",next:"slice_special"}]},
+slice_mea_density:{id:"slice_mea_density",text:"What electrode density do you need for your slice recordings?",subtitle:"Higher density gives finer spatial resolution; standard MEAs are more straightforward.",type:"single",options:[{label:"Standard (60 electrodes) — proven, straightforward",value:"standard",next:"slice_mea_focus"},{label:"High-density (4,096 electrodes) — fine spatial mapping",value:"high_density",next:"slice_mea_focus"},{label:"Not relevant",value:"nr",next:"slice_mea_focus"}]},
+slice_mea_focus:{id:"slice_mea_focus",text:"What is the primary experimental focus for your MEA slice recordings?",subtitle:"Different experiments may benefit from specific MEA features.",type:"multi",options:[{label:"Synaptic plasticity (LTP / LTD protocols)",value:"ltp_ltd",next:"slice_mea_tissue"},{label:"Epileptiform activity / seizure propagation",value:"epilepsy",next:"slice_mea_tissue"},{label:"Network oscillations (gamma, theta, ripples)",value:"oscillations",next:"slice_mea_tissue"},{label:"Pharmacological / drug screening",value:"pharma",next:"slice_mea_tissue"},{label:"Not relevant",value:"nr",next:"slice_mea_tissue"}]},
+slice_mea_tissue:{id:"slice_mea_tissue",text:"Will you also record from organoids or 3D tissue?",subtitle:"The 3Brain system offers 3D µNeedle electrodes that penetrate tissue.",type:"single",options:[{label:"Yes — organoids or spheroids",value:"organoid",next:"RESULTS"},{label:"Yes — retinal explants",value:"retina",next:"RESULTS"},{label:"No — brain slices only",value:"slices_only",next:"RESULTS"},{label:"Not relevant",value:"nr",next:"RESULTS"}]},
+culture_method:{id:"culture_method",text:"What recording approach do you prefer for your cultures?",subtitle:"Patch clamp gives detailed single-cell data; MEA gives network-wide activity overview.",type:"single",options:[{label:"Single-cell patch clamp (high resolution)",value:"patch",next:"culture_patch_speed"},{label:"Multi-electrode array (network activity)",value:"mea",next:"culture_mea_throughput"},{label:"Both approaches",value:"both",next:"culture_patch_speed"},{label:"Not relevant",value:"nr",next:"culture_patch_speed"}]},
+culture_patch_speed:{id:"culture_patch_speed",text:"Do you need rapid solution exchange for your experiments?",subtitle:"Fast application (millisecond) is critical for receptor kinetics and dose-response studies.",type:"single",options:[{label:"Yes — millisecond-timescale drug application (receptor kinetics)",value:"fast",next:"culture_patch_imaging"},{label:"No — standard bath application is sufficient",value:"standard",next:"culture_patch_imaging"},{label:"Not relevant",value:"nr",next:"culture_patch_imaging"}]},
+culture_patch_imaging:{id:"culture_patch_imaging",text:"Do you need imaging alongside your culture recordings?",subtitle:"Fluorescence imaging can add calcium, voltage, or ion concentration readouts.",type:"single",options:[{label:"Yes — high-speed calcium / fluorescence imaging",value:"fast_imaging",next:"culture_cell_type"},{label:"Yes — basic fluorescence (e.g., cell identification)",value:"basic_imaging",next:"culture_cell_type"},{label:"No imaging needed",value:"none",next:"culture_cell_type"},{label:"Not relevant",value:"nr",next:"culture_cell_type"}]},
+culture_cell_type:{id:"culture_cell_type",text:"What cell types will you primarily record from?",subtitle:"This helps determine the most appropriate setup configuration.",type:"multi",options:[{label:"Primary rodent neurons",value:"primary",next:"RESULTS"},{label:"iPSC-derived neurons",value:"ipsc",next:"RESULTS"},{label:"Heterologous expression (HEK293, CHO cells)",value:"hek",next:"RESULTS"},{label:"Cardiomyocytes",value:"cardio",next:"RESULTS"},{label:"Not relevant",value:"nr",next:"RESULTS"}]},
+culture_mea_throughput:{id:"culture_mea_throughput",text:"What throughput level do you need?",subtitle:"The MaxTwo multi-well system is designed for parallel, high-throughput screening.",type:"single",options:[{label:"High-throughput (multi-well, many conditions in parallel)",value:"high",next:"culture_mea_focus"},{label:"Standard (detailed recordings from individual cultures)",value:"standard",next:"culture_mea_focus"},{label:"Not relevant",value:"nr",next:"culture_mea_focus"}]},
+culture_mea_focus:{id:"culture_mea_focus",text:"What is your primary experimental interest with culture MEA?",subtitle:"Different research goals may leverage different MaxTwo capabilities.",type:"multi",options:[{label:"Drug screening / compound profiling",value:"drug_screen",next:"RESULTS"},{label:"Network development over days–weeks (longitudinal)",value:"longitudinal",next:"RESULTS"},{label:"Axonal conduction velocity measurements",value:"axonal",next:"RESULTS"},{label:"iPSC neuron maturation / quality control",value:"ipsc_qc",next:"RESULTS"},{label:"Disease phenotype characterization",value:"disease",next:"RESULTS"},{label:"Not relevant",value:"nr",next:"RESULTS"}]},
+organoid_method:{id:"organoid_method",text:"What recording approach do you need for your organoids?",subtitle:"Organoids can be recorded with MEA-based approaches or patch clamp on sliced organoids.",type:"single",options:[{label:"HD-MEA field potential recordings (intact or sliced)",value:"mea",next:"organoid_features"},{label:"Patch clamp on sliced organoids",value:"patch",next:"slice_opto"},{label:"Both MEA and patch clamp",value:"both",next:"organoid_features"},{label:"Not relevant",value:"nr",next:"organoid_features"}]},
+organoid_features:{id:"organoid_features",text:"What features are most important for your organoid work?",subtitle:"Different platforms have different strengths for organoid electrophysiology.",type:"multi",options:[{label:"3D electrode penetration into tissue (µNeedle)",value:"3d_needles",next:"organoid_scale"},{label:"Multi-well for comparing conditions in parallel",value:"multi_well",next:"organoid_scale"},{label:"Long-term longitudinal monitoring",value:"longitudinal",next:"organoid_scale"},{label:"Electrical stimulation and evoked responses",value:"stim",next:"organoid_scale"},{label:"Not relevant",value:"nr",next:"organoid_scale"}]},
+organoid_scale:{id:"organoid_scale",text:"What scale of experiments are you planning?",subtitle:"Higher throughput may benefit from multi-well platforms.",type:"single",options:[{label:"High-throughput screening (many organoids, many conditions)",value:"high",next:"RESULTS"},{label:"Detailed characterization of individual organoids",value:"detailed",next:"RESULTS"},{label:"Not relevant",value:"nr",next:"RESULTS"}]},
+invivo_focus:{id:"invivo_focus",text:"What in vivo experiments are you planning?",subtitle:"Currently the multiphoton system is the main platform supporting in vivo work.",type:"multi",options:[{label:"Two-photon calcium imaging in awake/anesthetized animals",value:"2p_invivo",next:"invivo_opto"},{label:"Holographic optogenetic manipulation during imaging",value:"holo_invivo",next:"invivo_opto"},{label:"Combined electrophysiology + two-photon imaging",value:"ephys_2p",next:"invivo_opto"},{label:"Not relevant",value:"nr",next:"invivo_opto"}]},
+invivo_opto:{id:"invivo_opto",text:"Do you need holographic optogenetic stimulation in vivo?",subtitle:"SLM-based holography enables single-cell-precision optogenetics in 3D volumes.",type:"single",options:[{label:"Yes — single-cell-precision holographic stimulation",value:"holographic",next:"RESULTS"},{label:"Yes — but widefield stimulation is sufficient",value:"widefield",next:"RESULTS"},{label:"No optogenetics",value:"none",next:"RESULTS"},{label:"Not relevant",value:"nr",next:"RESULTS"}]},
+generic_resolution:{id:"generic_resolution",text:"What level of recording resolution interests you most?",subtitle:"This helps narrow down the category of systems.",type:"single",options:[{label:"Single-cell intracellular (patch clamp)",value:"single_cell",next:"generic_feature"},{label:"Population / extracellular (MEA / field potentials)",value:"population",next:"generic_feature"},{label:"Two-photon imaging-based approaches",value:"two_photon",next:"generic_feature"},{label:"High-throughput screening",value:"screening",next:"generic_feature"},{label:"Not relevant",value:"nr",next:"generic_feature"}]},
+generic_feature:{id:"generic_feature",text:"What experimental features are most important to you?",subtitle:"Select all that would be valuable for your research.",type:"multi",options:[{label:"Optogenetic stimulation",value:"opto",next:"generic_goal"},{label:"Concurrent imaging (calcium, fluorescence)",value:"imaging",next:"generic_goal"},{label:"Pharmacological / drug application",value:"pharma",next:"generic_goal"},{label:"Synaptic plasticity (LTP / LTD)",value:"plasticity",next:"generic_goal"},{label:"Connectivity / circuit mapping",value:"connectivity",next:"generic_goal"},{label:"Not relevant",value:"nr",next:"generic_goal"}]},
+generic_goal:{id:"generic_goal",text:"What is the overarching goal of your experiments?",subtitle:"This helps prioritize which system features matter most.",type:"single",options:[{label:"Understanding synaptic / circuit mechanisms",value:"mechanism",next:"RESULTS"},{label:"Drug discovery or compound screening",value:"drug",next:"RESULTS"},{label:"Disease model characterization",value:"disease",next:"RESULTS"},{label:"Technology development / method optimization",value:"tech_dev",next:"RESULTS"},{label:"Not relevant",value:"nr",next:"RESULTS"}]}
+};
+
+/* ═══════════════════ SCORING ═══════════════════ */
+function scoreSystem(sys,trail){
+  let s=0,reasons=[];const all={};
+  trail.forEach(t=>{all[t.qId]=t.value});
+  const has=(q,v)=>{const a=all[q];if(!a)return false;return Array.isArray(a)?a.includes(v):a===v};
+  const hasAny=(q,vs)=>vs.some(v=>has(q,v));
+  const t=sys.tags,inc=v=>t.includes(v);
+
+  if(has("start","slice")&&inc("slice")){s+=30;reasons.push("Supports acute brain slices")}else if(has("start","slice")&&!inc("slice"))s-=30;
+  if(has("start","culture")&&inc("culture")){s+=30;reasons.push("Supports dissociated/cultured neurons")}else if(has("start","culture")&&!inc("culture"))s-=30;
+  if(has("start","organoid")&&inc("organoid")){s+=30;reasons.push("Supports organoid recordings")}else if(has("start","organoid")&&!inc("organoid"))s-=15;
+  if(has("start","in_vivo")&&inc("in_vivo")){s+=30;reasons.push("Supports in vivo recordings")}else if(has("start","in_vivo")&&!inc("in_vivo"))s-=25;
+  if(has("slice_resolution","single_cell")&&inc("single_cell")){s+=20;reasons.push("Single-cell patch clamp")}
+  if(has("slice_resolution","single_cell")&&inc("mea")&&!inc("patch_clamp"))s-=15;
+  if(has("slice_resolution","population")&&inc("population")){s+=20;reasons.push("Population-level field recordings")}
+  if(has("slice_resolution","population")&&inc("patch_clamp")&&!inc("mea"))s-=10;
+  if(has("slice_resolution","both")){if(inc("single_cell"))s+=10;if(inc("population"))s+=10}
+  if(has("generic_resolution","single_cell")&&inc("single_cell")){s+=18;reasons.push("Single-cell resolution")}
+  if(has("generic_resolution","population")&&inc("population")){s+=18;reasons.push("Population-level recordings")}
+  if(has("generic_resolution","two_photon")&&inc("two_photon")){s+=22;reasons.push("Two-photon imaging")}
+  if(has("generic_resolution","screening")&&inc("high_throughput")){s+=22;reasons.push("High-throughput screening")}
+  if(has("slice_patch_count","few")&&inc("dual_patch")&&!inc("multi_patch")){s+=12;reasons.push("Optimized for paired recordings")}
+  if(has("slice_patch_count","many")&&inc("multi_patch")){s+=25;reasons.push("8 simultaneous recordings")}
+  if(has("slice_patch_count","many")&&!inc("multi_patch")&&inc("patch_clamp"))s-=5;
+  if(has("slice_opto","directed")&&inc("directed_opto")){s+=18;reasons.push("Scanner-based directed optogenetics")}
+  if(has("slice_opto","widefield")&&inc("widefield_opto")){s+=18;reasons.push("Widefield LED optogenetics")}
+  if(has("slice_opto","holographic")&&inc("holographic")){s+=22;reasons.push("SLM holographic optogenetics")}
+  if(has("slice_opto","directed")&&inc("holographic")){s+=10;reasons.push("Holographic exceeds directed precision")}
+  if(hasAny("slice_opto_imaging",["calcium"])&&inc("calcium_imaging")){s+=15;reasons.push("Calcium/fluorescence imaging")}
+  if(hasAny("slice_opto_imaging",["two_photon"])&&inc("two_photon")){s+=20;reasons.push("Two-photon deep tissue imaging")}
+  if(hasAny("slice_no_opto_imaging",["calcium"])&&inc("calcium_imaging")){s+=15;reasons.push("Calcium/fluorescence imaging")}
+  if(hasAny("slice_no_opto_imaging",["two_photon"])&&inc("two_photon")){s+=20;reasons.push("Two-photon deep tissue imaging")}
+  if(has("slice_2p_focus","2p_calcium")&&inc("two_photon"))s+=12;
+  if(has("slice_2p_focus","2p_holographic")&&inc("holographic")){s+=15;reasons.push("Holographic 3D photostimulation")}
+  if(has("slice_2p_focus","2p_spine")&&inc("uncaging")){s+=15;reasons.push("Spine imaging & glutamate uncaging")}
+  if(has("slice_2p_focus","2p_deep")&&inc("deep_imaging")){s+=12;reasons.push("Deep tissue imaging")}
+  if(has("slice_special","iontophoresis")&&inc("iontophoresis")){s+=22;reasons.push("Iontophoresis system available")}
+  if(has("slice_special","plasticity_focus")&&inc("plasticity"))s+=10;
+  if(has("slice_special","plasticity_focus")&&inc("ltp")){s+=15;reasons.push("Dedicated LTP/LTD protocols")}
+  if(has("slice_special","human_tissue")&&inc("human_tissue")){s+=18;reasons.push("Human tissue recording capable")}
+  if(has("slice_special","pharmacology")&&inc("pharmacology"))s+=8;
+  if(has("multipatch_imaging","imaging_yes")&&inc("live_imaging")){s+=10;reasons.push("Live cell imaging with multi-patch")}
+  if(has("multipatch_imaging","opto_yes")&&inc("optogenetics")&&inc("multi_patch")){s+=12;reasons.push("Optogenetics + multipatch")}
+  if(has("multipatch_connectivity","motifs")&&inc("multi_patch")){s+=15;reasons.push("Higher-order motif analysis")}
+  if(has("multipatch_connectivity","probability")&&inc("multi_patch"))s+=10;
+  if(has("multipatch_connectivity","comparison")&&inc("human_tissue"))s+=10;
+  if(has("slice_mea_density","standard")&&sys.id.startsWith("mea_")){s+=15;reasons.push("Standard 60-electrode MEA")}
+  if(has("slice_mea_density","high_density")&&inc("hd_mea")&&inc("slice")){s+=18;reasons.push("High-density 4,096-electrode MEA")}
+  if(has("slice_mea_focus","ltp_ltd")&&inc("ltp")){s+=14;reasons.push("LTP/LTD protocol support")}
+  if(has("slice_mea_focus","epilepsy")&&inc("epilepsy")){s+=14;reasons.push("Epileptiform activity detection")}
+  if(has("slice_mea_focus","oscillations")&&inc("oscillations")){s+=14;reasons.push("Network oscillation analysis")}
+  if(has("slice_mea_focus","pharma")&&inc("pharmacology"))s+=10;
+  if(has("slice_mea_tissue","organoid")&&inc("organoid")){s+=15;reasons.push("Organoid recording support")}
+  if(has("slice_mea_tissue","retina")&&inc("retina")){s+=15;reasons.push("Retinal explant recordings")}
+  if(has("slice_mea_tissue","organoid")&&inc("3d_recording")){s+=10;reasons.push("3D µNeedle electrodes")}
+  if(has("culture_method","patch")&&inc("patch_clamp")&&inc("culture")){s+=15;reasons.push("Patch clamp for cultures")}
+  if(has("culture_method","mea")&&inc("mea")&&inc("culture")){s+=15;reasons.push("MEA for cultures")}
+  if(has("culture_patch_speed","fast")&&inc("fast_application")){s+=22;reasons.push("Fast millisecond solution exchange")}
+  if(has("culture_patch_imaging","fast_imaging")&&inc("calcium_imaging")&&inc("culture")){s+=12;reasons.push("High-speed fluorescence imaging")}
+  if(has("culture_cell_type","ipsc")&&inc("ipsc")){s+=10;reasons.push("iPSC neuron compatible")}
+  if(has("culture_cell_type","hek")&&inc("hek")){s+=10;reasons.push("HEK/CHO expression systems")}
+  if(has("culture_cell_type","cardio")&&inc("cardiomyocyte")){s+=15;reasons.push("Cardiomyocyte recordings")}
+  if(has("culture_mea_throughput","high")&&inc("high_throughput")){s+=18;reasons.push("High-throughput multi-well platform")}
+  if(has("culture_mea_focus","drug_screen")&&inc("drug_discovery")){s+=14;reasons.push("Drug screening capability")}
+  if(has("culture_mea_focus","longitudinal")&&inc("longitudinal")){s+=12;reasons.push("Long-term longitudinal recordings")}
+  if(has("culture_mea_focus","axonal")&&inc("axonal_velocity")){s+=14;reasons.push("Axonal conduction velocity tracking")}
+  if(has("culture_mea_focus","ipsc_qc")&&inc("ipsc")){s+=12;reasons.push("iPSC maturation assessment")}
+  if(has("organoid_features","3d_needles")&&inc("3d_recording")){s+=18;reasons.push("3D µNeedle penetrating electrodes")}
+  if(has("organoid_features","multi_well")&&inc("high_throughput")){s+=14;reasons.push("Multi-well parallel recording")}
+  if(has("organoid_features","longitudinal")&&inc("longitudinal")){s+=12;reasons.push("Longitudinal monitoring")}
+  if(has("organoid_scale","high")&&inc("high_throughput"))s+=12;
+  if(has("organoid_scale","detailed")&&inc("hd_mea"))s+=10;
+  if(has("invivo_focus","2p_invivo")&&inc("two_photon")){s+=18;reasons.push("In vivo two-photon imaging")}
+  if(has("invivo_focus","holo_invivo")&&inc("holographic")){s+=20;reasons.push("In vivo holographic optogenetics")}
+  if(has("invivo_focus","ephys_2p")&&inc("two_photon")&&inc("patch_clamp")){s+=18;reasons.push("Combined ephys + 2P imaging")}
+  if(has("invivo_opto","holographic")&&inc("holographic"))s+=15;
+  if(has("invivo_opto","widefield")&&inc("widefield_opto"))s+=10;
+  if(has("generic_feature","opto")&&inc("optogenetics")){s+=10;reasons.push("Optogenetics available")}
+  if(has("generic_feature","imaging")&&inc("imaging")){s+=10;reasons.push("Concurrent imaging")}
+  if(has("generic_feature","pharma")&&inc("pharmacology"))s+=8;
+  if(has("generic_feature","plasticity")&&(inc("plasticity")||inc("ltp"))){s+=10;reasons.push("Plasticity study capable")}
+  if(has("generic_feature","connectivity")&&(inc("connectivity")||inc("multi_patch"))){s+=12;reasons.push("Connectivity mapping")}
+  if(has("generic_goal","drug")&&(inc("drug_discovery")||inc("screening"))){s+=12;reasons.push("Drug discovery platform")}
+  if(has("generic_goal","disease")&&(inc("ipsc")||inc("human_tissue")))s+=10;
+  return{score:Math.max(s,0),reasons:[...new Set(reasons)]};
+}
+
+/* ═══════════════════ SVG ICONS ═══════════════════ */
+const ico={
+  beaker:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3h6M10 3v7.4L4.2 19.5a1 1 0 00.9 1.5h13.8a1 1 0 00.9-1.5L14 10.4V3"/><path d="M7 15h10" stroke-dasharray="2 2"/></svg>',
+  star:'<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0l2.5 5 5.5.8-4 3.9.9 5.3L8 12.4 3.1 15l.9-5.3-4-3.9L5.5 5z"/></svg>',
+  check:'<svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 7l3.5 3.5L12 3"/></svg>',
+  arrowR:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg>',
+  arrowL:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 8H3M7 4L3 8l4 4"/></svg>',
+  reset:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8a6 6 0 1111.5-2.5M14 2v4h-4"/></svg>'
+};
+
+/* ═══════════════════ STATE ═══════════════════ */
+let trail=[], currentQId="start", showResults=false, expandedId=null, tempMulti=[];
+
+function getLabel(qId,val){
+  const q=Q[qId];if(!q)return val;
+  if(Array.isArray(val))return val.map(v=>q.options.find(o=>o.value===v)?.label||v).join(", ");
+  return q.options.find(o=>o.value===val)?.label||val;
+}
+
+/* ═══════════════════ RENDER ═══════════════════ */
+function render(){
+  const app=document.getElementById("app");
+  if(showResults){app.innerHTML=renderResults();bindResults();return;}
+  app.innerHTML=renderQuestion();bindQuestion();
+}
+
+function headerHTML(){
+  return `<div class="hdr"><div class="badge">${ico.beaker}<span>VIB Electrophysiology Unit</span></div><h1 class="main-title">System Advisor</h1></div>`;
+}
+
+function renderQuestion(){
+  const q=Q[currentQId], isMulti=q.type==="multi";
+  let bc="";
+  if(trail.length>0){
+    bc='<div class="breadcrumbs">'+trail.slice(-3).map(t=>{
+      const qo=Q[t.qId];if(!qo)return"";
+      const qTxt=qo.text.split("?")[0].substring(0,38)+"…";
+      const aRaw=Array.isArray(t.value)?t.value.join(", "):t.value;
+      return `<div class="bc"><span class="bc-q">${qTxt}</span><span class="bc-a">${aRaw.substring(0,28)}</span></div>`;
+    }).join("")+"</div>";
+  }
+  const opts=q.options.map((o,i)=>{
+    const nr=o.value==="nr";
+    const sel=isMulti&&tempMulti.includes(o.value);
+    const cls=["opt"];if(sel)cls.push("selected");if(nr)cls.push("nr-opt");
+    const indicator=isMulti
+      ?`<div class="check"><span class="check-mark">✓</span></div>`
+      :`<div class="radio"><div class="radio-dot"></div></div>`;
+    return `<button class="${cls.join(" ")}" data-idx="${i}" data-val="${o.value}">${indicator}${o.label}</button>`;
+  }).join("");
+  const goBtn=isMulti?`<button class="btn-go" id="goBtn" ${tempMulti.length===0?"disabled":""}>Continue ${ico.arrowR}</button>`:"";
+  const backBtn=trail.length>0?`<button class="btn-back" id="backBtn">${ico.arrowL} Previous question</button>`:"";
+  return `${headerHTML()}${bc}<div class="card"><div class="step-label">Step ${trail.length+1}</div><h2 class="q-text">${q.text}</h2><p class="q-sub">${q.subtitle}</p><div class="options">${opts}</div>${goBtn}</div>${backBtn}`;
+}
+
+function renderResults(){
+  const results=SYSTEMS.map(sys=>({...sys,...scoreSystem(sys,trail)})).filter(r=>r.score>0).sort((a,b)=>b.score-a.score);
+  const mx=results.length>0?results[0].score:1;
+
+  const summaryItems=trail.map(t=>{
+    const qo=Q[t.qId];if(!qo)return"";
+    return `<div class="s-item"><span class="s-q">${qo.text}</span><br><span class="s-a">${getLabel(t.qId,t.value)}</span></div>`;
+  }).join("");
+
+  const cards=results.map((sys,idx)=>{
+    const pct=Math.round((sys.score/mx)*100);
+    const top=idx===0;
+    const exp=expandedId===sys.id;
+    const reasonsHTML=sys.reasons.length>0?`<div style="margin-bottom:14px"><div class="sec-label">Why this matches</div><div class="reason-tags">${sys.reasons.map(r=>`<span class="reason-tag">${ico.check} ${r}</span>`).join("")}</div></div>`:"";
+    const featsHTML=`<div style="margin-bottom:14px"><div class="sec-label">Key features</div>${sys.highlights.map(h=>`<div class="feat-line">${h}</div>`).join("")}</div>`;
+    const expsHTML=`<div><div class="sec-label">Experiments possible</div><div class="exp-grid">${sys.experiments.map(e=>`<div class="exp-item">· ${e}</div>`).join("")}</div></div>`;
+    return `<div class="sys ${top?"sys-top":"sys-other"} ${exp?"expanded":""}" data-sysid="${sys.id}">
+      <div class="sys-header"><div class="sys-info">
+        <div class="sys-name-row">${top?`<span style="color:var(--gold)">${ico.star}</span>`:""}<span class="sys-name ${top?"top":"other"}">${sys.name}</span></div>
+        <p class="sys-desc">${sys.shortDesc}</p>
+        <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill ${top?"top":"other"}" style="width:${pct}%"></div></div><span class="bar-pct ${top?"top":"other"}">${pct}%</span></div>
+      </div><div class="sys-prep">${sys.prep}</div></div>
+      <div class="sys-detail">${reasonsHTML}${featsHTML}${expsHTML}</div>
+    </div>`;
+  }).join("");
+
+  return `${headerHTML()}<h2 class="r-title">Recommended Systems</h2><p class="r-sub">Based on your ${trail.length} answers, ranked by match strength</p>
+    <details class="summary"><summary>▸ View your answers</summary><div class="summary-list">${summaryItems}</div></details>
+    ${results.length===0?'<div style="text-align:center;padding:40px;color:var(--txt3)">No systems matched. Try broadening your answers.</div>':`<div class="sys-list">${cards}</div>`}
+    <div style="text-align:center;margin-top:24px"><button class="btn-reset" id="resetBtn">${ico.reset} Start Over</button></div>`;
+}
+
+/* ═══════════════════ BINDINGS ═══════════════════ */
+function bindQuestion(){
+  const q=Q[currentQId], isMulti=q.type==="multi";
+  document.querySelectorAll(".opt").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const val=btn.dataset.val;
+      if(isMulti){
+        if(val==="nr"){tempMulti=["nr"];}
+        else{tempMulti=tempMulti.filter(v=>v!=="nr");const i=tempMulti.indexOf(val);i>-1?tempMulti.splice(i,1):tempMulti.push(val);}
+        render();
+      }else{
+        const opt=q.options.find(o=>o.value===val);
+        trail.push({qId:q.id,value:val});tempMulti=[];
+        if(opt.next==="RESULTS")showResults=true;else currentQId=opt.next;
+        render();
+      }
+    });
+  });
+  const goBtn=document.getElementById("goBtn");
+  if(goBtn)goBtn.addEventListener("click",()=>{
+    if(tempMulti.length===0)return;
+    trail.push({qId:q.id,value:[...tempMulti]});
+    const next=q.options[0].next;tempMulti=[];
+    if(next==="RESULTS")showResults=true;else currentQId=next;
+    render();
+  });
+  const backBtn=document.getElementById("backBtn");
+  if(backBtn)backBtn.addEventListener("click",goBack);
+}
+
+function bindResults(){
+  document.querySelectorAll(".sys").forEach(el=>{
+    el.addEventListener("click",()=>{
+      const id=el.dataset.sysid;
+      expandedId=expandedId===id?null:id;render();
+    });
+  });
+  const rb=document.getElementById("resetBtn");
+  if(rb)rb.addEventListener("click",resetAll);
+}
+
+function goBack(){
+  if(trail.length===0)return;
+  trail=trail.slice(0,-1);tempMulti=[];showResults=false;
+  if(trail.length===0){currentQId="start";render();return;}
+  const last=trail[trail.length-1],lq=Q[last.qId];
+  if(lq.type==="single"){const c=lq.options.find(o=>o.value===last.value);currentQId=c?c.next:"start";}
+  else currentQId=lq.options[0].next;
+  render();
+}
+function resetAll(){trail=[];currentQId="start";showResults=false;expandedId=null;tempMulti=[];render();}
+
+/* ═══════════════════ INIT ═══════════════════ */
+render();
+</script>
+</body>
+</html>
